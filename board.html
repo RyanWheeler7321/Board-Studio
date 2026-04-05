@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: file:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: file: https:; media-src 'self' data: blob: file: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'self' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com;">
+    <title>Board Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bodoni+Moda:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=EB+Garamond:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Inter:wght@400;600;700&family=Lato:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&family=Montserrat:wght@400;600;700&family=Merriweather:wght@400;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Roboto:wght@400;500;700&family=Source+Sans+Pro:wght@400;600;700&family=Spectral:wght@400;600&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/blocks.css">
+    <link rel="stylesheet" href="styles/media.css">
+    <link rel="stylesheet" href="styles/context-menu.css">
+    <link rel="stylesheet" href="styles/dialogs.css">
+    <link rel="stylesheet" href="styles/sublists.css">
+    <link rel="stylesheet" href="styles/tool-shell.css">
+    <link rel="stylesheet" href="styles/two-d-tools.css">
+    <link rel="stylesheet" href="styles/paint.css">
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar" id="topBar">
+            <div class="top-bar-left">
+                <button class="nav-button hidden" id="navUpButton" title="Go up">↑</button>
+                <div class="breadcrumb" id="breadcrumb"></div>
+            </div>
+            <div class="current-board-title" id="currentBoardTitle">Root</div>
+            <div class="top-bar-right">
+                <button class="refresh-button" id="refreshButton" title="Refresh board" aria-label="Refresh board">⟳</button>
+                <button class="settings-button" id="settingsButton" title="Board settings" aria-label="Board settings">⚙</button>
+                <div class="window-controls" id="windowControls">
+                    <button data-action="minimize" title="Minimize" aria-label="Minimize">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M5 11.25h14v1.5H5z"></path></svg>
+                    </button>
+                    <button data-action="maximize" title="Maximize" aria-label="Maximize">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6.5 6.5h11v11h-11zm1.5 1.5v8h8v-8z"></path></svg>
+                    </button>
+                    <button data-action="close" title="Close" aria-label="Close">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M7.05 5.99 12 10.94l4.95-4.95 1.06 1.06L13.06 12l4.95 4.95-1.06 1.06L12 13.06l-4.95 4.95-1.06-1.06L10.94 12 5.99 7.05z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="workspace" id="workspace">
+            <div class="console-panel is-hidden" id="consolePanel">
+                <div class="console-header">
+                    <div class="console-title" id="consoleTitle">Console</div>
+                    <button class="console-clear" id="consoleClearButton" title="Clear console" aria-label="Clear console">Clear</button>
+                </div>
+                <textarea class="console-log console-log-text" id="consoleLog" readonly spellcheck="false"></textarea>
+            </div>
+            <div class="console-divider is-hidden" id="consoleDivider"></div>
+            <aside class="sublists-panel" id="sublistsPanel" tabindex="0">
+                <nav class="sublists-sidebar" aria-label="Workspace">
+                    <button class="sublists-nav-button is-active" data-sublists-view="lists" title="Lists" aria-label="Lists">
+                        <span class="sublists-nav-icon sublists-nav-icon--lists" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                <path d="M4 6.25C4 5.56 4.56 5 5.25 5h2.5C8.44 5 9 5.56 9 6.25v2.5C9 9.44 8.44 10 7.75 10h-2.5C4.56 10 4 9.44 4 8.75v-2.5Zm0 9C4 14.56 4.56 14 5.25 14h2.5c.69 0 1.25.56 1.25 1.25v2.5C9 18.44 8.44 19 7.75 19h-2.5C4.56 19 4 18.44 4 17.75v-2.5Zm7-8.75h9v2h-9v-2Zm0 4.75h9v2h-9v-2Zm0 4h9v2h-9v-2Z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <button class="sublists-nav-button" data-sublists-view="tool-2d" title="2D Art" aria-label="2D Art">
+                        <span class="sublists-nav-icon sublists-nav-icon--tool-2d" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                <path d="M12 2.75a3.25 3.25 0 0 1 3.25 3.25v1.38a1.87 1.87 0 0 0 .55 1.32l.28.28a1.87 1.87 0 0 0 1.32.55h.6A3.25 3.25 0 1 1 18 16h-1.28a1.5 1.5 0 0 0-1.06.44l-4.72 4.72A1.5 1.5 0 0 1 8.38 20.1l1.1-4.06A1.5 1.5 0 0 0 8.03 14H8A5.25 5.25 0 0 1 8 3.5h4Zm-3.25 9a1 1 0 1 0 0 2h.08a1 1 0 1 0 0-2h-.08Zm3.92-5.5a1 1 0 1 0 0 2h.08a1 1 0 1 0 0-2h-.08Zm4.08 5.08a1 1 0 1 0 0 2h.08a1 1 0 1 0 0-2h-.08Z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                </nav>
+                <div class="sublists-content">
+                    <div class="sublists-scroll" id="sublistsScroll">
+                        <div class="sublists-columns" id="sublistsColumns"></div>
+                    </div>
+                    <section class="tool-shell-view" id="toolShellView" hidden aria-label="Board Studio Tools"></section>
+                </div>
+            </aside>
+            <div class="sublists-divider" id="sublistsDivider"></div>
+            <div class="board-container" id="boardContainer">
+                <div class="board-surface" id="boardSurface">
+                    <div class="board-grid" id="boardGrid"></div>
+                </div>
+            </div>
+        </div>
+        <div class="context-menu" id="contextMenu" hidden></div>
+        <div class="toast" id="toast" hidden></div>
+        <div class="image-preview-overlay" id="imagePreviewOverlay" hidden>
+            <div class="image-preview-frame">
+                <img class="image-preview-image" id="imagePreviewImage" alt="Image preview">
+            </div>
+        </div>
+        <div class="paint-overlay" id="paintOverlay" hidden>
+            <div class="paint-stage" id="paintStage">
+                <canvas class="paint-stage-shadow" id="paintStageShadowCanvas"></canvas>
+                <canvas class="paint-stage-pattern" id="paintStagePatternCanvas"></canvas>
+                <div class="paint-canvas-wrap" id="paintCanvasWrap">
+                    <canvas class="paint-canvas" id="paintCanvas"></canvas>
+                    <canvas class="paint-canvas paint-canvas-overlay" id="paintSelectionCanvas"></canvas>
+                    <canvas class="paint-canvas paint-canvas-overlay" id="paintOverlayCanvas"></canvas>
+                    <canvas class="paint-canvas paint-canvas-ui" id="paintUiCanvas"></canvas>
+                </div>
+                <div class="paint-stamp-inline" id="paintStampInline" hidden>
+                    <div class="paint-stamp-inline-card">
+                        <div class="paint-stamp-inline-header">
+                            <div class="paint-stamp-inline-title-group">
+                                <div class="paint-stamp-inline-title">Stamp Source</div>
+                            </div>
+                            <button class="paint-stamp-inline-hide" id="paintStampInlineHide" type="button" title="Hide editor">✕</button>
+                        </div>
+                        <div class="paint-stamp-inline-canvas-wrap" aria-label="Stamp editor">
+                            <canvas class="paint-stamp-edit" id="paintStampEditCanvas" width="256" height="256"></canvas>
+                        </div>
+                        <div class="paint-stamp-inline-actions">
+                            <button class="paint-stamp-clear" id="paintStampClear" type="button">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="paint-stage-ui" id="paintStageUiCanvas"></canvas>
+                <canvas class="paint-stage-cursor" id="paintCursorCanvas"></canvas>
+            </div>
+            <div class="paint-eyedrop-indicator" id="paintColorPickIndicator" hidden></div>
+            <div class="paint-top-actions" id="paintTopActions">
+                <div class="paint-top-chip paint-top-zoom" id="paintHudZoom">100%</div>
+                <div class="paint-top-actions-right">
+                    <button class="paint-top-btn paint-top-toggle" id="paintMirrorXToggle" type="button" title="Mirror X" aria-label="Mirror X">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 7h6v10H4zm10 0h6v10h-6zm-3-3h2v16h-2z"></path></svg>
+                    </button>
+                    <button class="paint-top-btn paint-top-toggle" id="paintMirrorYToggle" type="button" title="Mirror Y" aria-label="Mirror Y">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M7 4h10v6H7zm0 10h10v6H7zm-3-3h16v2H4z"></path></svg>
+                    </button>
+                    <button class="paint-top-btn paint-top-toggle" id="paintPatternToggle" type="button" title="Pattern mode" aria-label="Pattern mode">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4.5 4.5h6v6h-6zm9 0h6v6h-6zm-9 9h6v6h-6zm9 9v-6h6v6zm1.5-4.5h3v3h-3zM6 6h3v3H6zm9-1.5h3v3h-3zM6 15h3v3H6z"></path></svg>
+                    </button>
+                    <button class="paint-top-btn paint-top-toggle" id="paintAlphaLockToggle" type="button" title="Lock current alpha" aria-label="Lock current alpha">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                            <rect x="5" y="5" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+                            <path d="M8.5 5v14M12 5v14M15.5 5v14M5 8.5h14M5 12h14M5 15.5h14" fill="none" stroke="currentColor" stroke-width="1"></path>
+                            <path d="M5.75 5.75h3.5v3.5h-3.5zM12.75 5.75h3.5v3.5h-3.5zM9.25 9.25h3.5v3.5h-3.5zM16.25 9.25h3.5v3.5h-3.5zM5.75 12.75h3.5v3.5h-3.5zM12.75 12.75h3.5v3.5h-3.5zM9.25 16.25h3.5v3.5h-3.5zM16.25 16.25h3.5v3.5h-3.5z"></path>
+                        </svg>
+                    </button>
+                    <button class="paint-top-btn paint-top-toggle" id="paintInvisibleBgToggle" type="button" title="Invisible background mode" aria-label="Invisible background mode">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6 5h2v2H6zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h1v2h-1zM5 6h2v2H5zm12 0h2v2h-2zM5 10h2v2H5zm12 0h2v2h-2zM5 14h2v2H5zm12 0h2v2h-2zM5 18h2v1H5zm4 0h2v1H9zm4 0h2v1h-2zm4 0h2v1h-2z"></path></svg>
+                    </button>
+                    <button class="paint-top-btn paint-top-toggle paint-top-mode-btn" id="paintIsolateToggle" type="button" title="Isolate active layer" aria-label="Isolate active layer" aria-pressed="false">
+                        <span class="paint-top-mode-label">Iso</span>
+                    </button>
+                    <button class="paint-top-btn paint-top-toggle paint-top-mode-btn" id="paintDisplayScaleModeToggle" type="button" title="Display filter: Auto" aria-label="Display filter: Auto">
+                        <span class="paint-top-mode-label" id="paintDisplayScaleModeLabel">Auto</span>
+                    </button>
+                    <button class="paint-top-btn" id="paintHelpToggle" type="button" title="Hotkeys (?)" aria-label="Hotkeys">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 4.25a7.75 7.75 0 1 0 7.75 7.75A7.76 7.76 0 0 0 12 4.25m0 14a6.25 6.25 0 1 1 6.25-6.25A6.26 6.26 0 0 1 12 18.25"></path><path d="M11.25 15.85h1.5v1.5h-1.5zm.6-8.35a2.7 2.7 0 0 0-2.7 2.33l1.49.22a1.2 1.2 0 1 1 1.94 1.07c-.92.76-1.45 1.27-1.45 2.28v.42h1.5v-.31c0-.5.16-.75.9-1.36A2.7 2.7 0 0 0 11.85 7.5"></path></svg>
+                    </button>
+                    <div class="paint-top-side-stack">
+                        <div class="paint-top-menu-wrap">
+                            <button class="paint-top-btn" id="paintCanvasMenuToggle" type="button" title="Canvas options" aria-label="Canvas options">
+                                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M5 7h14v2H5zm0 4h14v2H5zm0 4h14v2H5z"></path></svg>
+                            </button>
+                            <div class="paint-top-menu" id="paintCanvasMenu" hidden>
+                                <button class="paint-top-menu-item" id="paintNoBoundaryClipToggle" type="button">No Boundary Clip: On</button>
+                                <button class="paint-top-menu-item" id="paintQuickAnimationPeekToggle" type="button">Quick Animation Peek: Off</button>
+                                <button class="paint-top-menu-item" id="paintCanvasEdgeToggle" type="button">Canvas Edge: On</button>
+                                <button class="paint-top-menu-item" id="paintCanvasFitView" type="button">Fit to Screen</button>
+                            </div>
+                        </div>
+                        <button class="paint-top-btn" id="paintHudAdjustBtn" type="button" title="Adjust image" aria-label="Adjust image">
+                            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6 6h2v4H6zm0 8h2v4H6zm10-8h2v4h-2zm0 8h2v4h-2zM7 8h10v2H7zm0 8h10v2H7zm4-6h2v8h-2z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="paint-job-hud" id="paintJobHud" hidden>
+                <div class="paint-job-hud-body">
+                    <div class="paint-job-hud-orbit" aria-hidden="true">
+                        <span class="paint-job-hud-orbit-ring paint-job-hud-orbit-ring--outer"></span>
+                        <span class="paint-job-hud-orbit-ring paint-job-hud-orbit-ring--middle"></span>
+                        <span class="paint-job-hud-orbit-ring paint-job-hud-orbit-ring--inner"></span>
+                        <span class="paint-job-hud-orbit-core"></span>
+                    </div>
+                    <div class="paint-job-hud-main">
+                        <div class="paint-job-hud-head">
+                            <div class="paint-job-hud-title" id="paintJobHudTitle">Working...</div>
+                            <button class="paint-job-hud-close" id="paintJobHudCancel" type="button" title="Cancel current job" aria-label="Cancel current job" hidden>X</button>
+                        </div>
+                        <div class="paint-job-hud-track">
+                            <div class="paint-job-hud-bar" id="paintJobHudBar"></div>
+                        </div>
+                        <div class="paint-job-hud-eta" id="paintJobHudEta"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="paint-project-bar" id="paintProjectBar" hidden></div>
+            <div class="paint-layer-bar" id="paintLayerBar" hidden>
+                <div class="paint-layer-list" id="paintLayerList" aria-label="Paint layers"></div>
+                <div class="paint-layer-actions">
+                    <button class="paint-layer-btn" id="paintLayerAdd" type="button" title="Add a new layer">+L</button>
+                    <button class="paint-layer-btn" id="paintLayerDuplicate" type="button" title="Duplicate active layer">Dup</button>
+                    <button class="paint-layer-btn" id="paintLayerDelete" type="button" title="Delete active layer">Del</button>
+                    <button class="paint-layer-btn" id="paintLayerMergeDown" type="button" title="Merge active layer down">Down</button>
+                    <button class="paint-layer-btn" id="paintLayerMergeAll" type="button" title="Merge all layers">All</button>
+                </div>
+            </div>
+            <div class="paint-timeline-panel" id="paintTimelinePanel" hidden>
+                <div class="paint-layer-list paint-timeline-panel-list" id="paintTimelinePanelList" aria-label="Paint timeline"></div>
+            </div>
+            <div class="paint-hud" id="paintHud" aria-hidden="true">
+                <div class="paint-hud-left"></div>
+                <div class="paint-hud-center">
+                    <div class="paint-hud-menu-wrap paint-hud-tool-wrap">
+                        <button class="paint-hud-tool-button" id="paintHudTool" type="button" title="Brushes">
+                            <div class="paint-hud-tool-icon" id="paintHudToolIcon" aria-hidden="true">2</div>
+                            <div class="paint-hud-tool-label" id="paintHudToolLabel">Ink</div>
+                        </button>
+                        <div class="paint-hud-menu paint-hud-tool-menu" id="paintToolMenu" hidden></div>
+                    </div>
+                    <button class="paint-hud-chip paint-hud-toggle paint-hud-eraser-chip" id="paintHudEraser" type="button"><span>Eraser</span><span class="paint-hud-toggle-indicator" aria-hidden="true"></span></button>
+                    <button class="paint-hud-color" id="paintHudColor" type="button" title="#ffffff" aria-label="Current color"></button>
+                    <div class="paint-hud-menu-wrap">
+                        <button class="paint-hud-chip paint-hud-chip-button" id="paintHudBlend" type="button">Normal</button>
+                        <div class="paint-hud-menu" id="paintBlendMenu" hidden></div>
+                    </div>
+                    <button class="paint-hud-chip paint-hud-chip-button" id="paintHudSize" type="button">Size 16 px</button>
+                    <button class="paint-hud-chip paint-hud-chip-button" id="paintHudSpacing" type="button">Spacing 25%</button>
+                    <div class="paint-hud-opacity" id="paintHudOpacityWrap" aria-label="Brush opacity cap">
+                        <div class="paint-hud-opacity-label">Opacity</div>
+                        <input class="paint-hud-opacity-slider" id="paintHudOpacitySlider" type="range" min="0" max="100" value="100" step="1">
+                        <div class="paint-hud-opacity-value" id="paintHudOpacityValue">100%</div>
+                    </div>
+                    <button class="paint-hud-chip paint-hud-chip-button" id="paintHudMode" type="button" hidden>Filled</button>
+                    <button class="paint-hud-chip paint-hud-chip-button paint-hud-toggle" id="paintHudPressureSize" type="button"><span>Size</span><span class="paint-hud-toggle-indicator" aria-hidden="true"></span></button>
+                    <button class="paint-hud-chip paint-hud-chip-button paint-hud-toggle" id="paintHudPressureOpacity" type="button"><span>Opacity</span><span class="paint-hud-toggle-indicator" aria-hidden="true"></span></button>
+                </div>
+                <div class="paint-hud-right"></div>
+            </div>
+            <div class="paint-exit-actions" id="paintExitActions" aria-hidden="true">
+                <button class="paint-exit-btn paint-exit-keep" id="paintExitKeep" type="button" title="Keep changes (Enter)">✓</button>
+                <button class="paint-exit-btn paint-exit-open" id="paintExitOpen" type="button" title="Exit menu (Esc)">✕</button>
+            </div>
+            <div class="paint-exit-menu" id="paintExitMenu" hidden>
+                <div class="paint-exit-menu-hint">Press Esc again to keep changes</div>
+                <div class="paint-exit-menu-actions">
+                    <button class="paint-exit-menu-btn" id="paintExitCancel" type="button">Cancel</button>
+                    <button class="paint-exit-menu-btn paint-exit-menu-danger" id="paintExitNegate" type="button">Negate changes</button>
+                </div>
+            </div>
+            <div class="paint-debug" id="paintDebugPanel" hidden>
+                <div class="paint-debug-title">Paint Console (D)</div>
+                <div class="paint-debug-body" id="paintDebugBody"></div>
+            </div>
+            <div class="paint-adjust-panel" id="paintAdjustPanel" hidden>
+                <div class="paint-adjust-card">
+                    <div class="paint-adjust-header">
+                        <div class="paint-adjust-title">Adjust Image</div>
+                        <button class="paint-adjust-close" id="paintAdjustClose" type="button" title="Close">✕</button>
+                    </div>
+                    <div class="paint-adjust-scroll">
+                        <div class="paint-adjust-section">
+                            <div class="paint-adjust-section-title">HSV</div>
+                            <label class="paint-adjust-row">
+                                <span>Hue</span>
+                                <input id="paintAdjustHue" type="range" min="-180" max="180" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustHueValue">0°</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Sat</span>
+                                <input id="paintAdjustSat" type="range" min="-100" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustSatValue">0%</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Val</span>
+                                <input id="paintAdjustVal" type="range" min="-100" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustValValue">0%</span>
+                            </label>
+                        </div>
+                        <div class="paint-adjust-section">
+                            <div class="paint-adjust-section-title">Tone</div>
+                            <label class="paint-adjust-row">
+                                <span>Contrast</span>
+                                <input id="paintAdjustContrast" type="range" min="-100" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustContrastValue">0%</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Gamma</span>
+                                <input id="paintAdjustGamma" type="range" min="0.25" max="2.5" value="1" step="0.01">
+                                <span class="paint-adjust-value" id="paintAdjustGammaValue">1.00</span>
+                            </label>
+                        </div>
+                        <div class="paint-adjust-section">
+                            <div class="paint-adjust-section-title">Colorize</div>
+                            <label class="paint-adjust-row">
+                                <span>Strength</span>
+                                <input id="paintAdjustColorizeStrength" type="range" min="0" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustColorizeStrengthValue">0%</span>
+                            </label>
+                            <div class="paint-adjust-color-row">
+                                <label>Shadows <input id="paintAdjustShadowColor" type="color" value="#3b2a5a"></label>
+                                <label>Mids <input id="paintAdjustMidColor" type="color" value="#5b6ee1"></label>
+                                <label>Lights <input id="paintAdjustLightColor" type="color" value="#ffd6a5"></label>
+                            </div>
+                        </div>
+                        <div class="paint-adjust-section">
+                            <div class="paint-adjust-section-title">Gradient Map</div>
+                            <label class="paint-adjust-row">
+                                <span>Map</span>
+                                <div class="paint-adjust-gradient-picker">
+                                    <button class="paint-adjust-gradient-btn" id="paintAdjustGradientBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                                        <span class="paint-adjust-gradient-label" id="paintAdjustGradientBtnLabel">None</span>
+                                        <span class="paint-adjust-gradient-swatch" id="paintAdjustGradientBtnSwatch" aria-hidden="true"></span>
+                                        <span class="paint-adjust-gradient-caret" aria-hidden="true">▾</span>
+                                    </button>
+                                    <div class="paint-adjust-gradient-menu" id="paintAdjustGradientMenu" role="listbox" hidden></div>
+                                    <input id="paintAdjustGradientMap" type="hidden" value="none">
+                                </div>
+                                <span></span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Strength</span>
+                                <input id="paintAdjustGradientStrength" type="range" min="0" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustGradientStrengthValue">0%</span>
+                            </label>
+                        </div>
+                        <div class="paint-adjust-section">
+                            <div class="paint-adjust-section-title">Stylize</div>
+                            <label class="paint-adjust-row">
+                                <span>Blur</span>
+                                <input id="paintAdjustBlur" type="range" min="0" max="20" value="0" step="0.25">
+                                <span class="paint-adjust-value" id="paintAdjustBlurValue">0.0px</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Noise</span>
+                                <input id="paintAdjustNoise" type="range" min="0" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustNoiseValue">0%</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Posterize</span>
+                                <input id="paintAdjustPosterize" type="range" min="0" max="16" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustPosterizeValue">Off</span>
+                            </label>
+                            <div class="paint-adjust-subsection-title">Halftone</div>
+                            <label class="paint-adjust-row">
+                                <span>Strength</span>
+                                <input id="paintAdjustHalftoneStrength" type="range" min="0" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustHalftoneStrengthValue">0%</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Scale</span>
+                                <input id="paintAdjustHalftoneScale" type="range" min="2" max="48" value="12" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustHalftoneScaleValue">12px</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Min</span>
+                                <input id="paintAdjustHalftoneMin" type="range" min="0" max="100" value="0" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustHalftoneMinValue">0%</span>
+                            </label>
+                            <label class="paint-adjust-row">
+                                <span>Max</span>
+                                <input id="paintAdjustHalftoneMax" type="range" min="0" max="100" value="100" step="1">
+                                <span class="paint-adjust-value" id="paintAdjustHalftoneMaxValue">100%</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="paint-adjust-actions">
+                        <button class="paint-adjust-action" id="paintAdjustReset" type="button">Reset</button>
+                        <button class="paint-adjust-action paint-adjust-action-primary" id="paintAdjustApply" type="button">Apply</button>
+                    </div>
+                </div>
+            </div>
+            <div class="paint-stamp-panel" id="paintStampPanel" hidden>
+                <div class="paint-stamp-card">
+                    <div class="paint-stamp-header">
+                        <div class="paint-stamp-title-group">
+                            <div class="paint-stamp-title" id="paintBrushPanelTitle">Brush</div>
+                            <div class="paint-stamp-subtitle" id="paintBrushPanelSubtitle">Brush settings</div>
+                        </div>
+                        <div class="paint-stamp-header-actions">
+                            <button class="paint-stamp-edit-toggle" id="paintStampToggleEditor" type="button" title="Toggle stamp source editor" hidden>Source</button>
+                            <button class="paint-stamp-close" id="paintStampClose" type="button" title="Close">✕</button>
+                        </div>
+                    </div>
+                    <div class="paint-stamp-scroll">
+                        <div class="paint-brush-section" id="paintBrushSectionAir" hidden>
+                            <div class="paint-stamp-controls">
+                                <div class="paint-stamp-section-title">Air Brush</div>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Style</span>
+                                    <select class="paint-stamp-select" id="paintAirFillMode">
+                                        <option value="fill">Fill</option>
+                                        <option value="border">Border</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Hardness</span>
+                                    <input id="paintAirHardness" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintAirHardnessValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Flow</span>
+                                    <input id="paintAirFlow" type="range" min="1" max="100" value="100" step="1">
+                                    <span class="paint-stamp-value" id="paintAirFlowValue">100%</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="paint-brush-section" id="paintBrushSectionInk" hidden>
+                            <div class="paint-stamp-controls">
+                                <div class="paint-stamp-section-title">Ink Brush</div>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Style</span>
+                                    <select class="paint-stamp-select" id="paintInkFillMode">
+                                        <option value="fill">Fill</option>
+                                        <option value="border">Border</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Tip Shape</span>
+                                    <select class="paint-stamp-select" id="paintInkShape">
+                                        <option value="circle">Circle</option>
+                                        <option value="square">Square</option>
+                                        <option value="diamond">Diamond</option>
+                                        <option value="triangle">Triangle</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="paint-brush-section" id="paintBrushSectionPaint" hidden>
+                            <div class="paint-stamp-controls">
+                                <div class="paint-stamp-section-title">Paint Brush</div>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Style</span>
+                                    <select class="paint-stamp-select" id="paintPaintFillMode">
+                                        <option value="fill">Fill</option>
+                                        <option value="border">Border</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Tip</span>
+                                    <select class="paint-stamp-select" id="paintPaintTipShape">
+                                        <option value="texture">Texture</option>
+                                        <option value="circle">Circle</option>
+                                        <option value="square">Square</option>
+                                        <option value="diamond">Diamond</option>
+                                        <option value="triangle">Triangle</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Hardness</span>
+                                    <input id="paintPaintHardness" type="range" min="0" max="100" value="58" step="1">
+                                    <span class="paint-stamp-value" id="paintPaintHardnessValue">58%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Flow</span>
+                                    <input id="paintPaintFlow" type="range" min="1" max="100" value="88" step="1">
+                                    <span class="paint-stamp-value" id="paintPaintFlowValue">88%</span>
+                                </label>
+                                <label class="paint-stamp-check">
+                                    <input id="paintPaintTiltStretch" type="checkbox" checked>
+                                    <span>Tilt stretch</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="paint-brush-section" id="paintBrushSectionShape" hidden>
+                            <div class="paint-stamp-controls">
+                                <div class="paint-stamp-section-title">Shape Brush</div>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Primitive</span>
+                                    <select class="paint-stamp-select" id="paintShapePrimitive">
+                                        <option value="rect">Rectangle</option>
+                                        <option value="ellipse">Ellipse</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Style</span>
+                                    <select class="paint-stamp-select" id="paintShapeFillMode">
+                                        <option value="fill">Fill</option>
+                                        <option value="border">Border</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Border</span>
+                                    <input id="paintShapeBorderWidth" type="range" min="1" max="240" value="6" step="1">
+                                    <span class="paint-stamp-value" id="paintShapeBorderWidthValue">6 px</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Corner</span>
+                                    <input id="paintShapeCornerRadius" type="range" min="0" max="128" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintShapeCornerRadiusValue">0 px</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="paint-brush-section" id="paintBrushSectionBlur" hidden>
+                            <div class="paint-stamp-controls">
+                                <div class="paint-stamp-section-title">Blur Brush</div>
+                                <label class="paint-stamp-row">
+                                    <span>Radius</span>
+                                    <input id="paintBlurRadius" type="range" min="1" max="120" value="10" step="1">
+                                    <span class="paint-stamp-value" id="paintBlurRadiusValue">10 px</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Strength</span>
+                                    <input id="paintBlurStrength" type="range" min="1" max="100" value="70" step="1">
+                                    <span class="paint-stamp-value" id="paintBlurStrengthValue">70%</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="paint-brush-section" id="paintBrushSectionStamp" hidden>
+                            <div class="paint-stamp-controls">
+                                <div class="paint-stamp-section-title">Stamp Brush</div>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Source Mode</span>
+                                    <select class="paint-stamp-select" id="paintStampSourceMode">
+                                        <option value="alpha-mask">Alpha Mask</option>
+                                        <option value="preserve-color">Preserve Color</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-inline-field">
+                                    <span>Tip Source</span>
+                                    <select class="paint-stamp-select" id="paintStampTipShape">
+                                        <option value="custom">Custom</option>
+                                        <option value="circle">Circle</option>
+                                        <option value="square">Square</option>
+                                        <option value="diamond">Diamond</option>
+                                        <option value="triangle">Triangle</option>
+                                    </select>
+                                </label>
+                                <label class="paint-stamp-check">
+                                    <input id="paintStampCommitOnRelease" type="checkbox" checked>
+                                    <span>Commit on release</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Size</span>
+                                    <input id="paintStampVarSize" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarSizeValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Size X</span>
+                                    <input id="paintStampVarSizeX" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarSizeXValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Size Y</span>
+                                    <input id="paintStampVarSizeY" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarSizeYValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Rotate</span>
+                                    <input id="paintStampVarRot" type="range" min="0" max="180" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarRotValue">0°</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Tint</span>
+                                    <input id="paintStampVarColor" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarColorValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Hue</span>
+                                    <input id="paintStampVarHue" type="range" min="0" max="180" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarHueValue">0°</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Value</span>
+                                    <input id="paintStampVarVal" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarValValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Sat</span>
+                                    <input id="paintStampVarSat" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarSatValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Scatter</span>
+                                    <input id="paintStampScatter" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampScatterValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-row">
+                                    <span>Alpha</span>
+                                    <input id="paintStampVarAlpha" type="range" min="0" max="100" value="0" step="1">
+                                    <span class="paint-stamp-value" id="paintStampVarAlphaValue">0%</span>
+                                </label>
+                                <label class="paint-stamp-check">
+                                    <input id="paintStampFollowRot" type="checkbox" checked>
+                                    <span>Follow brush rotation</span>
+                                </label>
+                                <div class="paint-stamp-check-row">
+                                    <label class="paint-stamp-check">
+                                        <input id="paintStampFlipX" type="checkbox">
+                                        <span>Flip X</span>
+                                    </label>
+                                    <label class="paint-stamp-check">
+                                        <input id="paintStampFlipY" type="checkbox">
+                                        <span>Flip Y</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="paint-stamp-library">
+                                <div class="paint-stamp-section-title">Stamps</div>
+                                <div class="paint-stamp-subtitle">Favorites (right-click to pin)</div>
+                                <div class="paint-stamp-grid" id="paintStampFavorites"></div>
+                                <div class="paint-stamp-subtitle">Recent</div>
+                                <div class="paint-stamp-grid paint-stamp-grid-scroll" id="paintStampRecents"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="paint-color-popover" id="paintColorPopover" hidden>
+                <div class="paint-color-popover-body">
+                    <div class="paint-color-neutrals" id="paintColorNeutrals" aria-label="Neutral color swatches"></div>
+                    <canvas class="paint-color-sv" id="paintColorSvCanvas" width="180" height="180" aria-label="Saturation value picker"></canvas>
+                </div>
+                <div class="paint-color-popover-foot">
+                    <div class="paint-color-foot-row">
+                        <input class="paint-color-hex" id="paintColorHexInput" type="text" value="#ffffff" spellcheck="false" aria-label="Hex color">
+                        <canvas class="paint-color-hue" id="paintColorHueCanvas" width="180" height="18" aria-label="Hue picker"></canvas>
+                    </div>
+                    <div class="paint-color-section">
+                        <div class="paint-color-section-title">Related</div>
+                        <div class="paint-color-related" id="paintColorRelated" aria-label="Related colors"></div>
+                    </div>
+                    <div class="paint-color-section">
+                        <div class="paint-color-section-title">Recent</div>
+                        <div class="paint-color-swatches" id="paintColorSwatches" aria-label="Recent colors"></div>
+                    </div>
+                </div>
+            </div>
+            <input type="color" id="paintColorInput" class="paint-color-input" aria-label="Paint color (system)" tabindex="-1">
+            <div class="paint-help-overlay" id="paintHelpOverlay" hidden>
+                <div class="paint-help-card" role="dialog" aria-modal="true" aria-label="Paint hotkeys">
+                    <div class="paint-help-title">Paint Hotkeys</div>
+                    <div class="paint-help-grid">
+                        <div class="paint-help-group-title">Brush</div>
+                        <div class="paint-help-item"><span>1-6</span><span>Air, Ink, Paint, Shape, Blur, Stamp</span></div>
+                        <div class="paint-help-item"><span>B</span><span>Brush menu</span></div>
+                        <div class="paint-help-item"><span>Shift+B</span><span>Fill/Border</span></div>
+                        <div class="paint-help-item"><span>[ / ]</span><span>Brush size</span></div>
+                        <div class="paint-help-item"><span>Shift+Drag</span><span>Size or spacing scrub</span></div>
+                        <div class="paint-help-item"><span>E</span><span>Eraser</span></div>
+                        <div class="paint-help-item"><span>O / P</span><span>Pressure opacity / size</span></div>
+                        <div class="paint-help-item"><span>N</span><span>Blend cycle</span></div>
+
+                        <div class="paint-help-group-title">Paint</div>
+                        <div class="paint-help-item"><span>C</span><span>Color popup</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Click/Drag</span><span>Eyedropper</span></div>
+                        <div class="paint-help-item"><span>F</span><span>Fill at cursor</span></div>
+                        <div class="paint-help-item"><span>Backspace</span><span>Fill canvas</span></div>
+                        <div class="paint-help-item"><span>M</span><span>Mirror canvas</span></div>
+
+                        <div class="paint-help-group-title">Select</div>
+                        <div class="paint-help-item"><span>Q</span><span>Lasso select</span></div>
+                        <div class="paint-help-item"><span>Ctrl+R</span><span>Rectangle select</span></div>
+                        <div class="paint-help-item"><span>Shift / Ctrl+Shift</span><span>Add / subtract on new selection</span></div>
+                        <div class="paint-help-item"><span>Ctrl while lassoing</span><span>Keep it open for line segments</span></div>
+                        <div class="paint-help-item"><span>X</span><span>Clear selection</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Shift+A</span><span>Select all</span></div>
+                        <div class="paint-help-item"><span>Ctrl+I</span><span>Invert selection</span></div>
+                        <div class="paint-help-item"><span>Ctrl+T</span><span>Transform selection or layer</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Shift+C</span><span>Crop mode</span></div>
+                        <div class="paint-help-item"><span>, / .</span><span>Transform opacity</span></div>
+                        <div class="paint-help-item"><span>F</span><span>Fit transform</span></div>
+
+                        <div class="paint-help-group-title">View</div>
+                        <div class="paint-help-item"><span>Space</span><span>Pan, tap to fit</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Space</span><span>Zoom drag</span></div>
+                        <div class="paint-help-item"><span>Wheel</span><span>Zoom</span></div>
+                        <div class="paint-help-item"><span>Ctrl+0</span><span>Fit view</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Shift+1</span><span>100% view</span></div>
+                        <div class="paint-help-item"><span>V</span><span>Layer viewer</span></div>
+                        <div class="paint-help-item"><span>?</span><span>Hold help</span></div>
+
+                        <div class="paint-help-group-title">Timeline</div>
+                        <div class="paint-help-item"><span>S</span><span>Play or pause</span></div>
+                        <div class="paint-help-item"><span>A</span><span>Toggle timeline bar</span></div>
+                        <div class="paint-help-item"><span>Tab</span><span>Expand timeline</span></div>
+                        <div class="paint-help-item"><span>Arrows</span><span>Frames left/right, layers up/down</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Arrows</span><span>Insert frame or layer</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Shift+Arrows</span><span>Duplicate frame or layer</span></div>
+                        <div class="paint-help-item"><span>H</span><span>Toggle layer visibility</span></div>
+
+                        <div class="paint-help-group-title">Panels</div>
+                        <div class="paint-help-item"><span>K</span><span>Animation tab</span></div>
+                        <div class="paint-help-item"><span>U</span><span>Unity panel</span></div>
+                        <div class="paint-help-item"><span>L</span><span>Logs tab</span></div>
+                        <div class="paint-help-item"><span>Shift+L</span><span>New layer</span></div>
+                        <div class="paint-help-item"><span>Ctrl+A</span><span>Project tab</span></div>
+                        <div class="paint-help-item"><span>W</span><span>Toggle project panel</span></div>
+
+                        <div class="paint-help-group-title">Clipboard</div>
+                        <div class="paint-help-item"><span>Ctrl+C / Ctrl+V</span><span>Copy / paste layer</span></div>
+
+                        <div class="paint-help-group-title">System</div>
+                        <div class="paint-help-item"><span>Ctrl+S</span><span>Save</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Z</span><span>Undo</span></div>
+                        <div class="paint-help-item"><span>Ctrl+Y / Ctrl+Shift+Z</span><span>Redo</span></div>
+                        <div class="paint-help-item"><span>D</span><span>Debug overlay</span></div>
+                        <div class="paint-help-item"><span>Enter</span><span>Keep changes</span></div>
+                        <div class="paint-help-item"><span>Esc</span><span>Exit, cancel, or close</span></div>
+                    </div>
+                    <div class="paint-help-footnote">Button toggles help. Question mark holds it open while pressed.</div>
+                </div>
+            </div>
+            <div class="paint-confirm-overlay" id="paintConfirmOverlay" hidden>
+                <div class="paint-confirm-card" role="dialog" aria-modal="true" aria-label="Discard paint changes">
+                    <div class="paint-confirm-title">Discard changes?</div>
+                    <div class="paint-confirm-body">You have unsaved edits. Discard and close?</div>
+                    <div class="paint-confirm-actions">
+                        <button class="paint-confirm-btn" id="paintConfirmCancel" type="button">Keep Editing</button>
+                        <button class="paint-confirm-btn paint-confirm-danger" id="paintConfirmDiscard" type="button">Discard</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="settings-overlay" id="settingsOverlay" hidden>
+            <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+                <div class="settings-header">
+                    <h2 class="settings-title" id="settingsTitle">Board Settings</h2>
+                    <button class="settings-close" id="settingsCloseButton" aria-label="Close settings">×</button>
+                </div>
+                <div class="settings-body">
+                    <div class="settings-layout">
+                        <nav class="settings-nav" id="settingsNav" role="tablist" aria-label="Settings sections">
+                            <button type="button" id="settingsTab-interface" data-section="interface" role="tab" aria-selected="true" aria-controls="settingsSection-interface">Interface</button>
+                            <button type="button" id="settingsTab-text" data-section="text" role="tab" aria-selected="false" aria-controls="settingsSection-text">Text</button>
+                            <button type="button" id="settingsTab-sublists" data-section="sublists" role="tab" aria-selected="false" aria-controls="settingsSection-sublists">Sublists</button>
+                            <button type="button" id="settingsTab-data" data-section="data" role="tab" aria-selected="false" aria-controls="settingsSection-data">Data</button>
+                        </nav>
+                        <div class="settings-content" id="settingsSections">
+                            <section class="settings-section is-active" id="settingsSection-interface" data-section="interface" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-interface">
+                                <div class="settings-subsection" data-subsection="surface">
+                                    <div class="settings-subsection-title">Board Surface</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="backgroundColorInput">Background</label>
+                                            <input type="color" id="backgroundColorInput" name="backgroundColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="accentColorInput">Accent</label>
+                                            <input type="color" id="accentColorInput" name="accentColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="accentToneInput">Accent Tone</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="accentToneInput" name="accentTone" min="0.6" max="1.6" step="0.02">
+                                                <span class="settings-value" id="accentToneValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="boardRadiusInput">Board Radius</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="boardRadiusInput" name="boardRadius" min="0" max="90" step="1">
+                                                <span class="settings-value" id="boardRadiusValue">0px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="grid">
+                                    <div class="settings-subsection-title">Grid</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="dotColorInput">Dot Color</label>
+                                            <input type="color" id="dotColorInput" name="dotColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="dotSizeInput">Dot Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="dotSizeInput" name="dotSize" min="0.05" max="6" step="0.05">
+                                                <span class="settings-value" id="dotSizeValue">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="majorDotScaleInput">Major Dot Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="majorDotScaleInput" name="majorDotScale" min="1" max="4" step="0.05">
+                                                <span class="settings-value" id="majorDotScaleValue">2.20×</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="blocks">
+                                    <div class="settings-subsection-title">Blocks</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="blockRadiusInput">Corner Radius</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockRadiusInput" name="blockRadius" min="0" max="72" step="1">
+                                                <span class="settings-value" id="blockRadiusValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockShadowColorInput">Block Shadow</label>
+                                            <input type="color" id="blockShadowColorInput" name="blockShadowColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockShadowIntensityInput">Shadow Intensity</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockShadowIntensityInput" name="blockShadowIntensity" min="0" max="1" step="0.01">
+                                                <span class="settings-value" id="blockShadowIntensityValue">45%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockShadowBlurInput">Shadow Blur</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockShadowBlurInput" name="blockShadowBlur" min="0" max="80" step="1">
+                                                <span class="settings-value" id="blockShadowBlurValue">22px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="selectionScaleInput">Selection Pop</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="selectionScaleInput" name="selectionScale" min="0" max="10" step="0.1">
+                                                <span class="settings-value" id="selectionScaleValue">2.0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockDragShadowColorInput">Drag Shadow</label>
+                                            <input type="color" id="blockDragShadowColorInput" name="blockDragShadowColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockDragShadowIntensityInput">Drag Intensity</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockDragShadowIntensityInput" name="blockDragShadowIntensity" min="0" max="1" step="0.01">
+                                                <span class="settings-value" id="blockDragShadowIntensityValue">0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockDragShadowBlurInput">Drag Blur</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockDragShadowBlurInput" name="blockDragShadowBlur" min="0" max="120" step="1">
+                                                <span class="settings-value" id="blockDragShadowBlurValue">38px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="interaction">
+                                    <div class="settings-subsection-title">Interaction</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="zoomSpeedInput">Zoom Speed</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="zoomSpeedInput" name="zoomSpeed" min="0.3" max="2.5" step="0.05">
+                                                <span class="settings-value" id="zoomSpeedValue">1.00×</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="resizeHandleSizeInput">Handle Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="resizeHandleSizeInput" name="resizeHandleSize" min="20" max="80" step="1">
+                                                <span class="settings-value" id="resizeHandleSizeValue">40px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="linkUrlLinesInput">Link Lines</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="linkUrlLinesInput" name="linkUrlMaxLines" min="1" max="6" step="1">
+                                                <span class="settings-value" id="linkUrlLinesValue">3</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="settings-section" id="settingsSection-text" data-section="text" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-text" hidden>
+                                <div class="settings-subsection" data-subsection="typography">
+                                    <div class="settings-subsection-title">Typography</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="textFontFamilySelect">Body Font</label>
+                                            <select class="settings-font-select" id="textFontFamilySelect" name="textFontFamily">
+                                                <option value="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" data-font="inter">Inter</option>
+                                                <option value="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" data-font="segoe">Segoe UI</option>
+                                                <option value="'Roboto', 'Helvetica Neue', Arial, sans-serif" data-font="roboto">Roboto</option>
+                                                <option value="'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif" data-font="sourcesans">Source Sans Pro</option>
+                                                <option value="'Montserrat', 'Helvetica Neue', Arial, sans-serif" data-font="montserrat">Montserrat</option>
+                                                <option value="'Open Sans', 'Helvetica Neue', Arial, sans-serif" data-font="opensans">Open Sans</option>
+                                                <option value="'Lato', 'Helvetica Neue', Arial, sans-serif" data-font="lato">Lato</option>
+                                                <option value="'Work Sans', 'Helvetica Neue', Arial, sans-serif" data-font="worksans">Work Sans</option>
+                                                <option value="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" data-font="ibmplex">IBM Plex Sans</option>
+                                                <option value="'Nunito', 'Helvetica Neue', Arial, sans-serif" data-font="nunito">Nunito</option>
+                                            </select>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textFontScaleInput">Body Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textFontScaleInput" name="textFontScale" min="0.5" max="2.5" step="0.05">
+                                                <span class="settings-value" id="textFontScaleValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleFontFamilySelect">Title Font</label>
+                                            <select class="settings-font-select settings-font-select--title" id="titleFontFamilySelect" name="titleFontFamily">
+                                                <option value="'Georgia', 'Palatino Linotype', 'Times New Roman', serif" data-font="georgia">Georgia</option>
+                                                <option value="'Playfair Display', 'Times New Roman', serif" data-font="playfair">Playfair Display</option>
+                                                <option value="'Libre Baskerville', 'Times New Roman', serif" data-font="librebaskerville">Libre Baskerville</option>
+                                                <option value="'Cormorant Garamond', 'Times New Roman', serif" data-font="cormorant">Cormorant Garamond</option>
+                                                <option value="'Merriweather', 'Times New Roman', serif" data-font="merriweather">Merriweather</option>
+                                                <option value="'EB Garamond', 'Times New Roman', serif" data-font="ebgaramond">EB Garamond</option>
+                                                <option value="'Abril Fatface', 'Times New Roman', serif" data-font="abril">Abril Fatface</option>
+                                                <option value="'Bodoni Moda', 'Times New Roman', serif" data-font="bodoni">Bodoni Moda</option>
+                                                <option value="'Spectral', 'Times New Roman', serif" data-font="spectral">Spectral</option>
+                                                <option value="'Lora', 'Times New Roman', serif" data-font="lora">Lora</option>
+                                            </select>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleFontScaleInput">Title Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleFontScaleInput" name="titleFontScale" min="0.5" max="3" step="0.05">
+                                                <span class="settings-value" id="titleFontScaleValue">100%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="text-spacing">
+                                    <div class="settings-subsection-title">Body Spacing</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="textLetterSpacingInput">Letter Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textLetterSpacingInput" name="textLetterSpacing" min="-2" max="10" step="0.1">
+                                                <span class="settings-value" id="textLetterSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textWordSpacingInput">Word Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textWordSpacingInput" name="textWordSpacing" min="-1" max="16" step="0.5">
+                                                <span class="settings-value" id="textWordSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textLineHeightInput">Line Height</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textLineHeightInput" name="textLineHeight" min="1" max="2.6" step="0.05">
+                                                <span class="settings-value" id="textLineHeightValue">1.50×</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textPaddingInput">Block Padding</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textPaddingInput" name="textBlockPadding" min="4" max="80" step="1">
+                                                <span class="settings-value" id="textPaddingValue">20px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="title-spacing">
+                                    <div class="settings-subsection-title">Title Styling</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="titleLetterSpacingInput">Letter Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleLetterSpacingInput" name="titleLetterSpacing" min="-2" max="12" step="0.1">
+                                                <span class="settings-value" id="titleLetterSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleWordSpacingInput">Word Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleWordSpacingInput" name="titleWordSpacing" min="-1" max="20" step="0.5">
+                                                <span class="settings-value" id="titleWordSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleLineHeightInput">Line Height</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleLineHeightInput" name="titleLineHeight" min="0.8" max="2.4" step="0.05">
+                                                <span class="settings-value" id="titleLineHeightValue">1.20×</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field settings-field--checkbox">
+                                            <label for="titleSmallCapsInput">Small Caps</label>
+                                            <input type="checkbox" id="titleSmallCapsInput" name="titleSmallCaps">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="text-edit">
+                                    <div class="settings-subsection-title">Text Edit Glow</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="textEditShadowColorInput">Glow Color</label>
+                                            <input type="color" id="textEditShadowColorInput" name="textEditShadowColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textEditShadowIntensityInput">Glow Strength</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textEditShadowIntensityInput" name="textEditShadowIntensity" min="0" max="1" step="0.01">
+                                                <span class="settings-value" id="textEditShadowIntensityValue">0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textEditShadowBlurInput">Glow Blur</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textEditShadowBlurInput" name="textEditShadowBlur" min="0" max="60" step="1">
+                                                <span class="settings-value" id="textEditShadowBlurValue">26px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="settings-section" id="settingsSection-sublists" data-section="sublists" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-sublists" hidden>
+                                <div class="settings-subsection" data-subsection="entries">
+                                    <div class="settings-subsection-title">Entries</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="sublistsEntryTextScaleInput">Entry Text Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsEntryTextScaleInput" name="sublistsEntryTextScale" min="0.5" max="2.6" step="0.05">
+                                                <span class="settings-value" id="sublistsEntryTextScaleValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="sublistsEntryPaddingXInput">Horizontal Margin</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsEntryPaddingXInput" name="sublistsEntryPaddingX" min="0" max="40" step="1">
+                                                <span class="settings-value" id="sublistsEntryPaddingXValue">8px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="sublistsEntryPaddingYInput">Vertical Margin</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsEntryPaddingYInput" name="sublistsEntryPaddingY" min="0" max="16" step="1">
+                                                <span class="settings-value" id="sublistsEntryPaddingYValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field settings-field--checkbox">
+                                            <label for="sublistsWordWrapInput">Word Wrap</label>
+                                            <input type="checkbox" id="sublistsWordWrapInput" name="sublistsWordWrap">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="titles">
+                                    <div class="settings-subsection-title">Titles</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="sublistsTitleTextScaleInput">Title Text Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsTitleTextScaleInput" name="sublistsTitleTextScale" min="0.5" max="2.6" step="0.05">
+                                                <span class="settings-value" id="sublistsTitleTextScaleValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="sublistsTitleOffsetXInput">Title Offset</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsTitleOffsetXInput" name="sublistsTitleOffsetX" min="-20" max="60" step="1">
+                                                <span class="settings-value" id="sublistsTitleOffsetXValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="sublistsTitleIntensityInput">Title Intensity</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsTitleIntensityInput" name="sublistsTitleIntensity" min="0.2" max="1.8" step="0.02">
+                                                <span class="settings-value" id="sublistsTitleIntensityValue">100%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="contrast">
+                                    <div class="settings-subsection-title">Contrast</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="sublistsListContrastInput">List Contrast</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="sublistsListContrastInput" name="sublistsListContrast" min="0.35" max="2.2" step="0.05">
+                                                <span class="settings-value" id="sublistsListContrastValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="sublistsActiveEntryColorInput">Active Entry Color</label>
+                                            <input type="color" id="sublistsActiveEntryColorInput" name="sublistsActiveEntryColor">
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="settings-section" id="settingsSection-data" data-section="data" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-data" hidden>
+                                <div class="settings-field">
+                                    <label>Current data folder</label>
+                                    <div class="settings-data-path" id="dataFolderPathDisplay" aria-live="polite"></div>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button" id="dataFolderChangeButton">Change data folder</button>
+                                    <button type="button" class="settings-action-button" id="dataFolderOpenSplashButton">Open setup screen</button>
+                                </div>
+                                <div class="settings-field">
+                                    <label>Backup folder</label>
+                                    <div class="settings-data-path" id="backupFolderPathDisplay" aria-live="polite"></div>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button" id="backupFolderChangeButton">Change backup folder</button>
+                                    <button type="button" class="settings-action-button" id="backupFolderOpenButton">Open backup folder</button>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button" id="dataFolderRefreshBlocksButton">Refresh Block Data</button>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button danger" id="dataFolderCleanupButton">Delete orphan data</button>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="data-setup-overlay" id="dataSetupOverlay" hidden>
+            <div class="data-setup-card" role="dialog" aria-modal="true" aria-labelledby="dataSetupTitle">
+                <h2 class="data-setup-title" id="dataSetupTitle">Set up Board Studio data</h2>
+                <p class="data-setup-description">Choose where to store your boards, settings, and assets. You can import an existing folder or create a fresh one.</p>
+                <div class="data-setup-actions">
+                    <button type="button" class="data-setup-button primary" id="dataSetupSelectButton">Import existing data</button>
+                    <button type="button" class="data-setup-button" id="dataSetupCreateButton">Create new data</button>
+                </div>
+                <div class="data-setup-footnote" id="dataSetupMessage"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (() => {
+            let bootErrorShown = false;
+            let lastRequireError = null;
+
+            function describeError(error) {
+                if (!error) {
+                    return 'Unknown error';
+                }
+                if (typeof error === 'string') {
+                    return error;
+                }
+                if (typeof error.message === 'string' && error.message.trim()) {
+                    return error.message.trim();
+                }
+                try {
+                    return JSON.stringify(error);
+                } catch {
+                    return String(error);
+                }
+            }
+
+            function showBootError(prefix, error) {
+                if (bootErrorShown) {
+                    return;
+                }
+                bootErrorShown = true;
+                const message = `${prefix}: ${describeError(error)}`;
+                console.error(message, error);
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.textContent = message;
+                    toast.hidden = false;
+                }
+            }
+
+            window.addEventListener('error', (event) => {
+                showBootError('Board Studio failed to start', event?.error || event?.message || event);
+            });
+
+            window.addEventListener('unhandledrejection', (event) => {
+                showBootError('Board Studio failed to start', event?.reason || event);
+            });
+
+            if (typeof require !== 'function') {
+                showBootError('Board Studio requires Electron nodeIntegration', new Error('require() unavailable'));
+                return;
+            }
+
+            const path = require('path');
+            const fs = require('fs');
+
+            function tryRequire(modulePath) {
+                try {
+                    require(modulePath);
+                    return true;
+                } catch (error) {
+                    lastRequireError = error;
+                    return false;
+                }
+            }
+
+            const resolveIndexFromLocation = () => {
+                try {
+                    const href = typeof window?.location?.href === 'string' ? window.location.href : '';
+                    if (!href) {
+                        return null;
+                    }
+                    const urlObj = new URL(href);
+                    if (urlObj.protocol !== 'file:') {
+                        return null;
+                    }
+                    let pathname = decodeURIComponent(urlObj.pathname || '');
+                    if (pathname.startsWith('/') && /^[a-zA-Z]:/.test(pathname.slice(1))) {
+                        pathname = pathname.slice(1);
+                    }
+                    if (!pathname) {
+                        return null;
+                    }
+                    return path.join(path.dirname(pathname), 'index.js');
+                } catch {
+                    return null;
+                }
+            };
+
+            try {
+                const fromLocation = resolveIndexFromLocation();
+                if (fromLocation && fs.existsSync(fromLocation) && tryRequire(fromLocation)) {
+                    return;
+                }
+            } catch (error) {
+                lastRequireError = error;
+            }
+
+            let ipcRenderer = null;
+            try {
+                ipcRenderer = require('electron')?.ipcRenderer || null;
+            } catch {}
+
+            if (!ipcRenderer?.invoke) {
+                showBootError('Board Studio failed to start', lastRequireError || new Error('IPC unavailable for bootstrapping'));
+                return;
+            }
+
+            const withTimeout = (promise, timeoutMs) => {
+                return new Promise((resolve, reject) => {
+                    const timer = setTimeout(() => reject(new Error('Timed out while resolving Board Studio path')), timeoutMs);
+                    promise.then((value) => {
+                        clearTimeout(timer);
+                        resolve(value);
+                    }).catch((err) => {
+                        clearTimeout(timer);
+                        reject(err);
+                    });
+                });
+            };
+
+            withTimeout(ipcRenderer.invoke('workboard:get-root-path'), 2000).then((rootPath) => {
+                const resolvedRoot = typeof rootPath === 'string' ? rootPath.trim() : '';
+                if (!resolvedRoot) {
+                    throw new Error('Board Studio root path unavailable');
+                }
+                const absoluteIndexPath = path.join(resolvedRoot, 'index.js');
+                if (!fs.existsSync(absoluteIndexPath)) {
+                    throw new Error(`Missing Board Studio index.js at ${absoluteIndexPath}`);
+                }
+                if (!tryRequire(absoluteIndexPath)) {
+                    throw lastRequireError || new Error(`Failed to load Board Studio from ${absoluteIndexPath}`);
+                }
+                return;
+            }).catch((error) => {
+                showBootError('Board Studio failed to start', error);
+            });
+        })();
+    </script>
+</body>
+</html>

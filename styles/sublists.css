@@ -1,0 +1,581 @@
+/* MARK: Sublists Panel */
+.workspace {
+    position: relative;
+}
+
+.sublists-panel {
+    --sublists-sidebar-width: 32px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--sublists-sidebar-width) 1fr;
+    align-items: stretch;
+    min-width: 260px;
+    max-width: 920px;
+    width: var(--sublists-panel-width, 420px);
+    background: linear-gradient(180deg, var(--bg-surface), var(--bg-card-deep));
+    border-right: 1px solid var(--border-subtle);
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.24);
+    overflow: hidden;
+    transition: width 0.08s ease-out;
+    will-change: width;
+    z-index: 25;
+    border-radius: 0 0 0 calc(var(--board-radius) * 0.85);
+}
+
+.sublists-panel:focus-visible {
+    outline: 2px solid var(--accent-outline);
+    outline-offset: -2px;
+}
+
+.sublists-panel.is-collapsed {
+    width: var(--sublists-sidebar-width);
+    min-width: var(--sublists-sidebar-width);
+    max-width: var(--sublists-sidebar-width);
+    grid-template-columns: var(--sublists-sidebar-width) 0px;
+}
+
+.sublists-panel.is-resizing {
+    transition: none;
+}
+
+.sublists-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 2px;
+    background: var(--bg-card-deep);
+    border-right: 1px solid var(--border-subtle);
+}
+
+.sublists-nav-button {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border 0.2s ease, transform 0.2s ease;
+}
+
+.sublists-nav-button:hover,
+.sublists-nav-button:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.sublists-nav-button.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent-outline);
+}
+
+.sublists-nav-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    opacity: 0.92;
+}
+
+.sublists-nav-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: currentColor;
+}
+
+.sublists-nav-button.is-active .sublists-nav-icon {
+    color: var(--accent-strong);
+}
+
+.sublists-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sublists-panel.is-collapsed .sublists-content {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-6px);
+    visibility: hidden;
+}
+
+.sublists-content > [hidden] {
+    display: none !important;
+}
+
+.sublists-scroll {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: 0;
+    background: var(--bg-surface);
+    min-height: 0;
+    height: 100%;
+}
+
+.sublists-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.sublists-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+}
+
+.sublists-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.animation-tools-view {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px;
+    background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent-soft) 28%, transparent), transparent 52%),
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 78%, transparent), var(--bg-surface));
+}
+
+.animation-tools-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 100%;
+}
+
+.animation-tools-shell-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 14px 12px;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-outline) 42%, var(--border-subtle));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.animation-tools-shell-title {
+    margin: 0;
+    font-family: var(--title-font-family);
+    font-size: 18px;
+    letter-spacing: 0.4px;
+    color: var(--text-primary);
+}
+
+.animation-tools-shell-subtitle {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.animation-tools-shell-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.animation-tools-shell-card {
+    min-height: 120px;
+    padding: 14px;
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-card-deep) 88%, transparent), color-mix(in srgb, var(--bg-surface) 92%, transparent));
+    border: 1px solid color-mix(in srgb, var(--accent-outline) 28%, var(--border-subtle));
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+}
+
+.animation-tools-shell-card-title {
+    margin: 0 0 8px;
+    font-family: var(--title-font-family);
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.animation-tools-shell-card-body {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.sublists-columns {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-height: 100%;
+    height: 100%;
+    width: 100%;
+    flex: 1 1 auto;
+}
+
+.sublists-divider {
+    width: 5px;
+    cursor: col-resize;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08), transparent);
+    border-right: 1px solid rgba(0, 0, 0, 0.24);
+    border-left: 1px solid rgba(0, 0, 0, 0.24);
+    position: relative;
+    z-index: 20;
+}
+
+.sublists-divider.is-hidden {
+    display: none;
+}
+
+.sublists-divider.is-dragging {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.sublists-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+}
+
+.sublist-card {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    min-height: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border-right: 1px solid var(--border-subtle);
+    border-radius: 0;
+    box-shadow: none;
+    transition: border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.sublist-card:last-child {
+    border-right: none;
+}
+
+.sublist-card:focus-within {
+    border-color: var(--accent-outline);
+}
+
+.sublist-card.is-drop-target {
+    border-right-color: var(--accent);
+    box-shadow: inset -1px 0 0 var(--accent-outline), inset 0 0 0 1px color-mix(in srgb, var(--accent-soft) 70%, transparent);
+}
+
+.sublist-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+    height: 100%;
+}
+
+.sublist-topbar {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    background: var(--bg-card-deep);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+
+.sublist-title {
+    flex: 1;
+    font-size: clamp(10px, calc(11px * var(--sublists-title-font-scale, var(--title-font-scale, 1))), 16px);
+    font-weight: 600;
+    letter-spacing: calc(0.6px + var(--title-letter-spacing-offset, 0px));
+    word-spacing: var(--title-word-spacing-offset, 0px);
+    font-variant: var(--title-small-caps, normal);
+    color: var(--sublists-title-color, var(--text-secondary));
+    outline: none;
+    border-radius: 6px;
+    padding: 2px 0;
+    margin-left: var(--sublists-title-offset-x, 0px);
+    font-family: var(--title-font-family);
+    line-height: var(--title-line-height-offset, 1.2);
+}
+
+.sublist-title:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+
+.sublist-editor {
+    --sublist-line-height: calc(52px * var(--text-font-scale, 1) * var(--sublists-entry-text-scale, 1));
+    --sublist-line-light: var(--sublists-line-light, rgba(255, 255, 255, 0.035));
+    --sublist-line-dark: var(--sublists-line-dark, rgba(0, 0, 0, 0.095));
+    --sublist-empty-fill: var(--bg-surface);
+    --sublist-column-tint: transparent;
+    --sublist-active-line: transparent;
+    --sublist-active-line-start: -9999px;
+    --sublist-stripe-offset: 0px;
+    --sublist-content-height: 0px;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 100%;
+    border: none;
+    background-color: var(--sublist-empty-fill);
+    background-image:
+        linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent var(--sublist-active-line-start),
+            var(--sublist-active-line) var(--sublist-active-line-start),
+            var(--sublist-active-line) calc(var(--sublist-active-line-start) + var(--sublist-line-height)),
+            transparent calc(var(--sublist-active-line-start) + var(--sublist-line-height)),
+            transparent 100%
+        ),
+        linear-gradient(
+            to bottom,
+            var(--sublist-column-tint) 0,
+            var(--sublist-column-tint) 100%
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            var(--sublist-line-light) 0,
+            var(--sublist-line-light) var(--sublist-line-height),
+            var(--sublist-line-dark) var(--sublist-line-height),
+            var(--sublist-line-dark) calc(var(--sublist-line-height) * 2)
+        );
+    background-size: 100% 100%, 100% var(--sublist-content-height), 100% calc(var(--sublist-content-height) + var(--sublist-stripe-offset));
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    background-position: 0 0, 0 0, 0 calc(var(--sublist-stripe-offset) * -1);
+    color: var(--text-primary);
+    font-size: calc(24px * 0.7 * var(--text-font-scale, 1) * var(--sublists-entry-text-scale, 1));
+    line-height: var(--sublist-line-height);
+    letter-spacing: calc(0.2px + var(--text-letter-spacing-offset, 0px));
+    word-spacing: var(--text-word-spacing-offset, 0px);
+    padding: 0 var(--sublists-entry-padding-x, 8px) 10px;
+    resize: none;
+    outline: none;
+    overflow: hidden;
+    white-space: pre;
+    font-family: var(--text-font-family);
+}
+
+.workboard-sublists-wrap .sublist-editor {
+    background-attachment: local, local, local;
+}
+
+@supports (scrollbar-width: none) {
+    .workboard-sublists-wrap .sublist-editor {
+        scrollbar-width: none;
+    }
+}
+
+.workboard-sublists-wrap .sublist-editor::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.sublist-editor.sublist-editor--rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sublist-entry {
+    --sublist-entry-padding-y: var(--sublists-entry-padding-y, 0px);
+    --sublist-entry-line-height: calc((var(--sublist-line-height) - (var(--sublist-entry-padding-y) * 2)) / 2);
+    width: 100%;
+    height: var(--sublist-line-height);
+    box-sizing: border-box;
+    padding: var(--sublist-entry-padding-y) 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    resize: none;
+    outline: none;
+    overflow: hidden;
+    line-height: var(--sublist-entry-line-height);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    display: block;
+}
+
+.sublist-entry.is-active-row {
+    background: var(--sublists-active-entry-fill, var(--sublists-active-line, rgba(255, 255, 255, 0.11)));
+    color: var(--sublists-active-entry-text-color, var(--text-primary));
+}
+
+.sublist-editor.is-drop-target {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-outline) 70%, transparent);
+    transition: box-shadow 0.14s ease;
+}
+
+.sublist-editor.is-drop-target.is-drop-at-end {
+    box-shadow: inset 0 -3px 0 var(--accent), inset 0 0 0 1px color-mix(in srgb, var(--accent-outline) 70%, transparent);
+}
+
+.sublist-entry.is-drop-anchor {
+    box-shadow: inset 0 3px 0 var(--accent);
+}
+
+.sublist-entry.is-single-line {
+    padding-top: calc((var(--sublist-line-height) - var(--sublist-entry-line-height)) / 2);
+    padding-bottom: calc((var(--sublist-line-height) - var(--sublist-entry-line-height)) / 2);
+}
+
+.sublist-entry.is-double-line {
+    padding-top: var(--sublist-entry-padding-y);
+    padding-bottom: var(--sublist-entry-padding-y);
+}
+
+.sublist-entry::selection {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+}
+
+.sublist-card:nth-child(odd) .sublist-editor {
+    --sublist-column-tint: rgba(0, 0, 0, 0.03);
+}
+
+.sublist-card:nth-child(even) .sublist-editor {
+    --sublist-stripe-offset: var(--sublist-line-height);
+}
+
+.sublist-editor.is-active {
+    --sublist-active-line: var(--sublists-active-line, rgba(255, 255, 255, 0.075));
+}
+
+.sublist-editor.is-empty {
+    --sublist-column-tint: transparent;
+}
+
+.sublists-columns.is-editing .sublist-card:not(:last-child) {
+    border-right-color: var(--accent-outline);
+    box-shadow: inset -1px 0 0 var(--accent-outline);
+}
+
+.sublist-editor::selection {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+}
+
+.sublists-sidebar-menu {
+    position: fixed;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+    padding: 6px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.45);
+    z-index: 40;
+    font-family: var(--text-font-family);
+}
+
+.sublists-sidebar-menu.is-open {
+    display: flex;
+}
+
+.sublists-sidebar-menu-item {
+    width: 100%;
+    text-align: left;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+}
+
+.sublists-sidebar-menu-item:hover,
+.sublists-sidebar-menu-item:focus-visible {
+    background: var(--accent-soft);
+    border-color: var(--accent-outline);
+    color: var(--accent-strong);
+    outline: none;
+}
+
+.sublists-sidebar-menu-item:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.sublists-sidebar-menu-item.danger {
+    color: #f2a4b6;
+    background: rgba(240, 108, 138, 0.12);
+}
+
+.sublists-sidebar-menu-item.danger:hover,
+.sublists-sidebar-menu-item.danger:focus-visible {
+    color: #ffd2dd;
+    background: rgba(240, 108, 138, 0.2);
+    border-color: rgba(240, 108, 138, 0.4);
+}
+
+.sublists-entry-drag-pill {
+    position: fixed;
+    max-width: min(460px, 55vw);
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--accent-outline) 80%, transparent);
+    background: color-mix(in srgb, var(--bg-card) 88%, var(--accent-soft) 12%);
+    color: var(--text-primary);
+    font: 600 12px/1.25 var(--text-font-family);
+    letter-spacing: 0.12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    z-index: 5200;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transform: translate3d(0, 0, 0);
+    animation: sublist-drag-pill-in 120ms ease-out;
+}
+
+body.sublists-entry-dragging {
+    user-select: none;
+}
+
+body.sublists-entry-dragging * {
+    cursor: grabbing !important;
+}
+
+@keyframes sublist-drag-pill-in {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -4px, 0) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}

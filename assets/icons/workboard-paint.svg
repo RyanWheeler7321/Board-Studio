@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="paint-stroke" x1="34" y1="30" x2="212" y2="224" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7FCFF"/>
+      <stop offset="0.48" stop-color="#86D9FF"/>
+      <stop offset="1" stop-color="#33A0FF"/>
+    </linearGradient>
+    <linearGradient id="paint-fill" x1="58" y1="42" x2="198" y2="214" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#121C2B"/>
+      <stop offset="1" stop-color="#0B111C"/>
+    </linearGradient>
+    <linearGradient id="paint-accent" x1="98" y1="92" x2="172" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C4F3FF"/>
+      <stop offset="1" stop-color="#49AFFF"/>
+    </linearGradient>
+  </defs>
+  <rect x="30" y="26" width="196" height="204" rx="34" fill="url(#paint-fill)" stroke="url(#paint-stroke)" stroke-width="10"/>
+  <rect x="58" y="54" width="140" height="98" rx="22" fill="#132135" stroke="url(#paint-stroke)" stroke-width="8"/>
+  <path d="M84 82H172" stroke="url(#paint-stroke)" stroke-width="8" stroke-linecap="round" opacity="0.28"/>
+  <path d="M84 106H156" stroke="url(#paint-stroke)" stroke-width="8" stroke-linecap="round" opacity="0.2"/>
+  <path d="M82 178L120 140L146 166L108 204C103.582 208.418 96.4183 208.418 92 204L82 194C77.5817 189.582 77.5817 182.418 82 178Z" fill="url(#paint-accent)" stroke="url(#paint-stroke)" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M146 166L174 138" stroke="url(#paint-stroke)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M168 92C177.389 92 185 99.6112 185 109C185 122.5 169.5 130 160 140C153.87 132.868 151 126.585 151 120C151 104.536 159.536 92 168 92Z" fill="#7ED4FF" opacity="0.92"/>
+  <rect x="66" y="182" width="124" height="14" rx="7" fill="#86D9FF" opacity="0.9"/>
+</svg>
