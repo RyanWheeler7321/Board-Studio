@@ -1,0 +1,26 @@
+{
+  "name": "board-studio",
+  "version": "0.1.0",
+  "description": "Desktop board workspace for references, notes and media",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "keywords": [
+    "electron",
+    "board-studio",
+    "moodboard",
+    "references"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^41.1.1"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "node-pty": "^1.1.0",
+    "three": "^0.181.0"
+  }
+}

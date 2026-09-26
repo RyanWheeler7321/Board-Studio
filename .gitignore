@@ -1,0 +1,8 @@
+node_modules/
+logs/
+dist/
+Thumbs.db
+.DS_Store
+*.tmp
+*.bak
+board-studio-config.json

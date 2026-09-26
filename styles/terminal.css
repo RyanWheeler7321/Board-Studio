@@ -1,0 +1,205 @@
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("../assets/fonts/SpaceGrotesk[wght].ttf") format("truetype");
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+}
+
+.workspace {
+    position: relative;
+}
+
+.terminal-panel {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    width: var(--terminal-panel-width, 720px);
+    min-width: 0;
+    background: #030405;
+    border-right: 1px solid var(--border-subtle);
+    overflow: hidden;
+    z-index: 25;
+}
+
+.terminal-panel.is-collapsed {
+    display: none;
+}
+
+.terminal-host {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #030405;
+}
+
+.terminal-divider {
+    width: 5px;
+    cursor: col-resize;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08), transparent);
+    border-right: 1px solid rgba(0, 0, 0, 0.24);
+    border-left: 1px solid rgba(0, 0, 0, 0.24);
+    position: relative;
+    z-index: 20;
+}
+
+.terminal-divider.is-hidden {
+    display: none;
+}
+
+.terminal-divider.is-dragging {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.terminal-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+}
+
+.terminal-edge {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    z-index: 30;
+    pointer-events: none;
+}
+
+.terminal-edge.is-panel-open {
+    display: none;
+}
+
+.terminal-context-menu {
+    position: fixed;
+    display: none;
+    flex-direction: column;
+    min-width: 160px;
+    padding: 6px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.45);
+    z-index: 40;
+    font-family: var(--text-font-family);
+}
+
+.terminal-context-menu.is-open {
+    display: flex;
+}
+
+.terminal-context-menu-item {
+    width: 100%;
+    text-align: left;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.terminal-context-menu-item.danger {
+    color: #f2a4b6;
+    background: rgba(240, 108, 138, 0.12);
+}
+
+.terminal-context-menu-item.danger:hover,
+.terminal-context-menu-item.danger:focus-visible {
+    color: #ffd2dd;
+    background: rgba(240, 108, 138, 0.2);
+    border-color: rgba(240, 108, 138, 0.4);
+    outline: none;
+}
+
+.terminal-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    background: #030405;
+}
+
+.terminal-stage {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    background: #030405;
+}
+
+.terminal-viewport {
+    position: absolute;
+    inset: 18px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.terminal-viewport .xterm {
+    width: 100%;
+    height: 100%;
+}
+
+.terminal-stage .xterm-viewport {
+    scrollbar-width: none;
+}
+
+.terminal-stage .xterm-viewport::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.terminal-stage .xterm-scrollable-element > .scrollbar,
+.terminal-stage .xterm-scrollable-element > .shadow {
+    display: none !important;
+}
+
+.terminal-status {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: color-mix(in srgb, #030405 90%, transparent);
+    color: #FFE1ED;
+    text-align: center;
+    font-size: 13px;
+}
+
+.terminal-status[hidden] {
+    display: none;
+}
+
+.terminal-status-button {
+    padding: 8px 13px;
+    border: 1px solid var(--accent-outline);
+    border-radius: 9px;
+    background: var(--accent-soft);
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.terminal-status-button:hover,
+.terminal-status-button:focus-visible {
+    background: color-mix(in srgb, var(--accent-soft) 78%, var(--bg-card));
+    outline: none;
+}

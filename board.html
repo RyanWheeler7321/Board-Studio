@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: file:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: file: https:; media-src 'self' data: blob: file: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'self' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com;">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./node_modules/three/build/three.module.js",
+                "three/addons/": "./node_modules/three/examples/jsm/"
+            }
+        }
+    </script>
+    <script>
+        (() => {
+            let modulesPromise = null;
+            window.__boardStudioLoadAnimated3dModules = () => {
+                if (!modulesPromise) {
+                    modulesPromise = Promise.all([
+                        import('three'),
+                        import('three/addons/controls/OrbitControls.js'),
+                        import('three/addons/loaders/GLTFLoader.js')
+                    ]).then(([THREE, controls, loader]) => ({
+                        THREE,
+                        OrbitControls: controls.OrbitControls,
+                        GLTFLoader: loader.GLTFLoader
+                    })).catch((error) => {
+                        modulesPromise = null;
+                        throw error;
+                    });
+                }
+                return modulesPromise;
+            };
+        })();
+    </script>
+    <title>Board Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bodoni+Moda:wght@400;600&family=Cormorant+Garamond:wght@400;600&family=EB+Garamond:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Inter:wght@400;600;700&family=Lato:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&family=Montserrat:wght@400;600;700&family=Merriweather:wght@400;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Roboto:wght@400;500;700&family=Source+Sans+Pro:wght@400;600;700&family=Spectral:wght@400;600&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/blocks.css">
+    <link rel="stylesheet" href="styles/media.css">
+    <link rel="stylesheet" href="styles/context-menu.css">
+    <link rel="stylesheet" href="styles/dialogs.css">
+    <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css">
+    <link rel="stylesheet" href="styles/terminal.css">
+    <link rel="stylesheet" href="styles/categories.css">
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar" id="topBar">
+            <div class="top-bar-left">
+                <button class="nav-button hidden" id="navUpButton" title="Go up">↑</button>
+                <div class="breadcrumb" id="breadcrumb"></div>
+            </div>
+            <div class="current-board-title" id="currentBoardTitle">Root</div>
+            <div class="top-bar-right">
+                <button class="refresh-button" id="refreshButton" title="Refresh board" aria-label="Refresh board">⟳</button>
+                <button class="settings-button" id="settingsButton" title="Board settings" aria-label="Board settings">⚙</button>
+                <div class="window-controls" id="windowControls">
+                    <button data-action="minimize" title="Minimize" aria-label="Minimize">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M5 11.25h14v1.5H5z"></path></svg>
+                    </button>
+                    <button data-action="maximize" title="Maximize" aria-label="Maximize">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6.5 6.5h11v11h-11zm1.5 1.5v8h8v-8z"></path></svg>
+                    </button>
+                    <button data-action="close" title="Close" aria-label="Close">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M7.05 5.99 12 10.94l4.95-4.95 1.06 1.06L13.06 12l4.95 4.95-1.06 1.06L12 13.06l-4.95 4.95-1.06-1.06L10.94 12 5.99 7.05z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="workspace" id="workspace">
+            <div class="console-panel is-hidden" id="consolePanel">
+                <div class="console-header">
+                    <div class="console-title" id="consoleTitle">Console</div>
+                    <button class="console-clear" id="consoleClearButton" title="Clear console" aria-label="Clear console">Clear</button>
+                </div>
+                <textarea class="console-log console-log-text" id="consoleLog" readonly spellcheck="false"></textarea>
+            </div>
+            <div class="console-divider is-hidden" id="consoleDivider"></div>
+            <aside class="terminal-panel is-collapsed" id="terminalPanel" aria-hidden="true">
+                <section class="terminal-host" id="terminalHost" aria-label="Terminal"></section>
+            </aside>
+            <div class="terminal-divider is-hidden" id="terminalDivider" aria-hidden="true"></div>
+            <div class="terminal-edge" id="terminalEdge" hidden aria-hidden="true"></div>
+            <div class="board-container" id="boardContainer">
+                <div class="board-surface" id="boardSurface">
+                    <div class="board-grid" id="boardGrid"></div>
+                </div>
+            </div>
+            <div class="category-edge-trigger" id="categoryEdgeTrigger" aria-hidden="true"></div>
+            <aside class="category-drawer" id="categoryDrawer" aria-label="Categories" aria-hidden="true">
+                <div class="category-drawer-list" id="categoryDrawerList"></div>
+            </aside>
+        </div>
+        <div class="context-menu" id="contextMenu" hidden></div>
+        <div class="toast" id="toast" hidden></div>
+        <div class="image-preview-overlay" id="imagePreviewOverlay" hidden>
+            <div class="image-preview-frame">
+                <img class="image-preview-image" id="imagePreviewImage" alt="Image preview">
+            </div>
+        </div>
+        <div class="settings-overlay" id="settingsOverlay" hidden>
+            <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+                <div class="settings-header">
+                    <h2 class="settings-title" id="settingsTitle">Board Settings</h2>
+                    <button class="settings-close" id="settingsCloseButton" aria-label="Close settings">×</button>
+                </div>
+                <div class="settings-body">
+                    <div class="settings-layout">
+                        <nav class="settings-nav" id="settingsNav" role="tablist" aria-label="Settings sections">
+                            <button type="button" id="settingsTab-interface" data-section="interface" role="tab" aria-selected="true" aria-controls="settingsSection-interface">Interface</button>
+                            <button type="button" id="settingsTab-text" data-section="text" role="tab" aria-selected="false" aria-controls="settingsSection-text">Text</button>
+                            <button type="button" id="settingsTab-data" data-section="data" role="tab" aria-selected="false" aria-controls="settingsSection-data">Data</button>
+                            <button type="button" id="settingsTab-terminal" data-section="terminal" role="tab" aria-selected="false" aria-controls="settingsSection-terminal">Terminal</button>
+                        </nav>
+                        <div class="settings-content" id="settingsSections">
+                            <section class="settings-section is-active" id="settingsSection-interface" data-section="interface" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-interface">
+                                <div class="settings-subsection" data-subsection="surface">
+                                    <div class="settings-subsection-title">Board Surface</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="backgroundColorInput">Background</label>
+                                            <input type="color" id="backgroundColorInput" name="backgroundColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="accentColorInput">Accent</label>
+                                            <input type="color" id="accentColorInput" name="accentColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="accentToneInput">Accent Tone</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="accentToneInput" name="accentTone" min="0.6" max="1.6" step="0.02">
+                                                <span class="settings-value" id="accentToneValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="boardRadiusInput">Board Radius</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="boardRadiusInput" name="boardRadius" min="0" max="90" step="1">
+                                                <span class="settings-value" id="boardRadiusValue">0px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="grid">
+                                    <div class="settings-subsection-title">Grid</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="dotColorInput">Dot Color</label>
+                                            <input type="color" id="dotColorInput" name="dotColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="dotSizeInput">Dot Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="dotSizeInput" name="dotSize" min="0.05" max="6" step="0.05">
+                                                <span class="settings-value" id="dotSizeValue">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="majorDotScaleInput">Major Dot Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="majorDotScaleInput" name="majorDotScale" min="1" max="4" step="0.05">
+                                                <span class="settings-value" id="majorDotScaleValue">2.20×</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="blocks">
+                                    <div class="settings-subsection-title">Blocks</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="blockRadiusInput">Corner Radius</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockRadiusInput" name="blockRadius" min="0" max="72" step="1">
+                                                <span class="settings-value" id="blockRadiusValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="arrowWidthScaleInput">Arrow Width</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="arrowWidthScaleInput" name="arrowWidthScale" min="0.35" max="1.8" step="0.01">
+                                                <span class="settings-value" id="arrowWidthScaleValue">49%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockShadowColorInput">Block Shadow</label>
+                                            <input type="color" id="blockShadowColorInput" name="blockShadowColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockShadowIntensityInput">Shadow Intensity</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockShadowIntensityInput" name="blockShadowIntensity" min="0" max="1" step="0.01">
+                                                <span class="settings-value" id="blockShadowIntensityValue">45%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockShadowBlurInput">Shadow Blur</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockShadowBlurInput" name="blockShadowBlur" min="0" max="80" step="1">
+                                                <span class="settings-value" id="blockShadowBlurValue">22px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="selectionScaleInput">Selection Pop</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="selectionScaleInput" name="selectionScale" min="0" max="10" step="0.1">
+                                                <span class="settings-value" id="selectionScaleValue">2.0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockDragShadowColorInput">Drag Shadow</label>
+                                            <input type="color" id="blockDragShadowColorInput" name="blockDragShadowColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockDragShadowIntensityInput">Drag Intensity</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockDragShadowIntensityInput" name="blockDragShadowIntensity" min="0" max="1" step="0.01">
+                                                <span class="settings-value" id="blockDragShadowIntensityValue">0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="blockDragShadowBlurInput">Drag Blur</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="blockDragShadowBlurInput" name="blockDragShadowBlur" min="0" max="120" step="1">
+                                                <span class="settings-value" id="blockDragShadowBlurValue">38px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="interaction">
+                                    <div class="settings-subsection-title">Interaction</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="zoomSpeedInput">Zoom Speed</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="zoomSpeedInput" name="zoomSpeed" min="0.3" max="2.5" step="0.05">
+                                                <span class="settings-value" id="zoomSpeedValue">1.00×</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="resizeHandleSizeInput">Handle Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="resizeHandleSizeInput" name="resizeHandleSize" min="20" max="80" step="1">
+                                                <span class="settings-value" id="resizeHandleSizeValue">40px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="linkUrlLinesInput">Link Lines</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="linkUrlLinesInput" name="linkUrlMaxLines" min="1" max="6" step="1">
+                                                <span class="settings-value" id="linkUrlLinesValue">3</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="settings-section" id="settingsSection-text" data-section="text" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-text" hidden>
+                                <div class="settings-subsection" data-subsection="typography">
+                                    <div class="settings-subsection-title">Typography</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="textFontFamilySelect">Body Font</label>
+                                            <select class="settings-font-select" id="textFontFamilySelect" name="textFontFamily">
+                                                <option value="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" data-font="inter">Inter</option>
+                                                <option value="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" data-font="segoe">Segoe UI</option>
+                                                <option value="'Roboto', 'Helvetica Neue', Arial, sans-serif" data-font="roboto">Roboto</option>
+                                                <option value="'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif" data-font="sourcesans">Source Sans Pro</option>
+                                                <option value="'Montserrat', 'Helvetica Neue', Arial, sans-serif" data-font="montserrat">Montserrat</option>
+                                                <option value="'Open Sans', 'Helvetica Neue', Arial, sans-serif" data-font="opensans">Open Sans</option>
+                                                <option value="'Lato', 'Helvetica Neue', Arial, sans-serif" data-font="lato">Lato</option>
+                                                <option value="'Work Sans', 'Helvetica Neue', Arial, sans-serif" data-font="worksans">Work Sans</option>
+                                                <option value="'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif" data-font="ibmplex">IBM Plex Sans</option>
+                                                <option value="'Nunito', 'Helvetica Neue', Arial, sans-serif" data-font="nunito">Nunito</option>
+                                            </select>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textFontScaleInput">Body Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textFontScaleInput" name="textFontScale" min="0.5" max="2.5" step="0.05">
+                                                <span class="settings-value" id="textFontScaleValue">100%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleFontFamilySelect">Title Font</label>
+                                            <select class="settings-font-select settings-font-select--title" id="titleFontFamilySelect" name="titleFontFamily">
+                                                <option value="'Georgia', 'Palatino Linotype', 'Times New Roman', serif" data-font="georgia">Georgia</option>
+                                                <option value="'Playfair Display', 'Times New Roman', serif" data-font="playfair">Playfair Display</option>
+                                                <option value="'Libre Baskerville', 'Times New Roman', serif" data-font="librebaskerville">Libre Baskerville</option>
+                                                <option value="'Cormorant Garamond', 'Times New Roman', serif" data-font="cormorant">Cormorant Garamond</option>
+                                                <option value="'Merriweather', 'Times New Roman', serif" data-font="merriweather">Merriweather</option>
+                                                <option value="'EB Garamond', 'Times New Roman', serif" data-font="ebgaramond">EB Garamond</option>
+                                                <option value="'Abril Fatface', 'Times New Roman', serif" data-font="abril">Abril Fatface</option>
+                                                <option value="'Bodoni Moda', 'Times New Roman', serif" data-font="bodoni">Bodoni Moda</option>
+                                                <option value="'Spectral', 'Times New Roman', serif" data-font="spectral">Spectral</option>
+                                                <option value="'Lora', 'Times New Roman', serif" data-font="lora">Lora</option>
+                                                <option value="'Marcellus', 'Times New Roman', serif" data-font="marcellus">Marcellus</option>
+                                            </select>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleFontScaleInput">Title Size</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleFontScaleInput" name="titleFontScale" min="0.5" max="3" step="0.05">
+                                                <span class="settings-value" id="titleFontScaleValue">100%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="text-spacing">
+                                    <div class="settings-subsection-title">Body Spacing</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="textLetterSpacingInput">Letter Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textLetterSpacingInput" name="textLetterSpacing" min="-2" max="10" step="0.1">
+                                                <span class="settings-value" id="textLetterSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textWordSpacingInput">Word Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textWordSpacingInput" name="textWordSpacing" min="-1" max="16" step="0.5">
+                                                <span class="settings-value" id="textWordSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textLineHeightInput">Line Height</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textLineHeightInput" name="textLineHeight" min="1" max="2.6" step="0.05">
+                                                <span class="settings-value" id="textLineHeightValue">1.50×</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textPaddingInput">Block Padding</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textPaddingInput" name="textBlockPadding" min="4" max="80" step="1">
+                                                <span class="settings-value" id="textPaddingValue">20px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="title-spacing">
+                                    <div class="settings-subsection-title">Title Styling</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="titleLetterSpacingInput">Letter Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleLetterSpacingInput" name="titleLetterSpacing" min="-2" max="12" step="0.1">
+                                                <span class="settings-value" id="titleLetterSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleWordSpacingInput">Word Gap</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleWordSpacingInput" name="titleWordSpacing" min="-1" max="20" step="0.5">
+                                                <span class="settings-value" id="titleWordSpacingValue">0px</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="titleLineHeightInput">Line Height</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="titleLineHeightInput" name="titleLineHeight" min="0.8" max="2.4" step="0.05">
+                                                <span class="settings-value" id="titleLineHeightValue">1.20×</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field settings-field--checkbox">
+                                            <label for="titleSmallCapsInput">Small Caps</label>
+                                            <input type="checkbox" id="titleSmallCapsInput" name="titleSmallCaps">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-subsection" data-subsection="text-edit">
+                                    <div class="settings-subsection-title">Text Edit Glow</div>
+                                    <div class="settings-subsection-body">
+                                        <div class="settings-field">
+                                            <label for="textEditShadowColorInput">Glow Color</label>
+                                            <input type="color" id="textEditShadowColorInput" name="textEditShadowColor">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textEditShadowIntensityInput">Glow Strength</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textEditShadowIntensityInput" name="textEditShadowIntensity" min="0" max="1" step="0.01">
+                                                <span class="settings-value" id="textEditShadowIntensityValue">0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label for="textEditShadowBlurInput">Glow Blur</label>
+                                            <div class="settings-slider compact">
+                                                <input type="range" id="textEditShadowBlurInput" name="textEditShadowBlur" min="0" max="60" step="1">
+                                                <span class="settings-value" id="textEditShadowBlurValue">26px</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="settings-section" id="settingsSection-data" data-section="data" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-data" hidden>
+                                <div class="settings-field">
+                                    <label>Current data folder</label>
+                                    <div class="settings-data-path" id="dataFolderPathDisplay" aria-live="polite"></div>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button" id="dataFolderChangeButton">Change data folder</button>
+                                    <button type="button" class="settings-action-button" id="dataFolderOpenSplashButton">Open setup screen</button>
+                                </div>
+                                <div class="settings-field">
+                                    <label>Backup folder</label>
+                                    <div class="settings-data-path" id="backupFolderPathDisplay" aria-live="polite"></div>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button" id="backupFolderChangeButton">Change backup folder</button>
+                                    <button type="button" class="settings-action-button" id="backupFolderOpenButton">Open backup folder</button>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button" id="dataFolderRefreshBlocksButton">Refresh Block Data</button>
+                                </div>
+                                <div class="settings-actions">
+                                    <button type="button" class="settings-action-button danger" id="dataFolderCleanupButton">Delete orphan data</button>
+                                </div>
+                            </section>
+                            <section class="settings-section" id="settingsSection-terminal" data-section="terminal" role="tabpanel" tabindex="0" aria-labelledby="settingsTab-terminal" hidden>
+                                <div class="settings-field">
+                                    <label for="terminalShellInput">Shell</label>
+                                    <input type="text" class="settings-text-input" id="terminalShellInput" spellcheck="false" autocomplete="off">
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="data-setup-overlay" id="dataSetupOverlay" hidden>
+            <div class="data-setup-card" role="dialog" aria-modal="true" aria-labelledby="dataSetupTitle">
+                <h2 class="data-setup-title" id="dataSetupTitle">Set up Board Studio data</h2>
+                <p class="data-setup-description">Choose where to store your boards, settings, and assets. You can import an existing folder or create a fresh one.</p>
+                <div class="data-setup-actions">
+                    <button type="button" class="data-setup-button primary" id="dataSetupSelectButton">Import existing data</button>
+                    <button type="button" class="data-setup-button" id="dataSetupCreateButton">Create new data</button>
+                </div>
+                <div class="data-setup-footnote" id="dataSetupMessage"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (() => {
+            let bootErrorShown = false;
+            let lastRequireError = null;
+
+            function describeError(error) {
+                if (!error) {
+                    return 'Unknown error';
+                }
+                if (typeof error === 'string') {
+                    return error;
+                }
+                if (typeof error.message === 'string' && error.message.trim()) {
+                    return error.message.trim();
+                }
+                try {
+                    return JSON.stringify(error);
+                } catch {
+                    return String(error);
+                }
+            }
+
+            function showBootError(prefix, error) {
+                if (bootErrorShown) {
+                    return;
+                }
+                bootErrorShown = true;
+                const message = `${prefix}: ${describeError(error)}`;
+                console.error(message, error);
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.textContent = message;
+                    toast.hidden = false;
+                }
+            }
+
+            window.addEventListener('error', (event) => {
+                showBootError('Board Studio failed to start', event?.error || event?.message || event);
+            });
+
+            window.addEventListener('unhandledrejection', (event) => {
+                showBootError('Board Studio failed to start', event?.reason || event);
+            });
+
+            if (typeof require !== 'function') {
+                showBootError('Board Studio requires Electron nodeIntegration', new Error('require() unavailable'));
+                return;
+            }
+
+            const path = require('path');
+            const fs = require('fs');
+
+            function tryRequire(modulePath) {
+                try {
+                    require(modulePath);
+                    return true;
+                } catch (error) {
+                    lastRequireError = error;
+                    return false;
+                }
+            }
+
+            const resolveIndexFromLocation = () => {
+                try {
+                    const href = typeof window?.location?.href === 'string' ? window.location.href : '';
+                    if (!href) {
+                        return null;
+                    }
+                    const urlObj = new URL(href);
+                    if (urlObj.protocol !== 'file:') {
+                        return null;
+                    }
+                    let pathname = decodeURIComponent(urlObj.pathname || '');
+                    if (pathname.startsWith('/') && /^[a-zA-Z]:/.test(pathname.slice(1))) {
+                        pathname = pathname.slice(1);
+                    }
+                    if (!pathname) {
+                        return null;
+                    }
+                    return path.join(path.dirname(pathname), 'index.js');
+                } catch {
+                    return null;
+                }
+            };
+
+            try {
+                const fromLocation = resolveIndexFromLocation();
+                if (fromLocation && fs.existsSync(fromLocation) && tryRequire(fromLocation)) {
+                    return;
+                }
+            } catch (error) {
+                lastRequireError = error;
+            }
+
+            let ipcRenderer = null;
+            try {
+                ipcRenderer = require('electron')?.ipcRenderer || null;
+            } catch {}
+
+            if (!ipcRenderer?.invoke) {
+                showBootError('Board Studio failed to start', lastRequireError || new Error('IPC unavailable for bootstrapping'));
+                return;
+            }
+
+            const withTimeout = (promise, timeoutMs) => {
+                return new Promise((resolve, reject) => {
+                    const timer = setTimeout(() => reject(new Error('Timed out while resolving Board Studio path')), timeoutMs);
+                    promise.then((value) => {
+                        clearTimeout(timer);
+                        resolve(value);
+                    }).catch((err) => {
+                        clearTimeout(timer);
+                        reject(err);
+                    });
+                });
+            };
+
+            withTimeout(ipcRenderer.invoke('boardstudio:get-root-path'), 2000).then((rootPath) => {
+                const resolvedRoot = typeof rootPath === 'string' ? rootPath.trim() : '';
+                if (!resolvedRoot) {
+                    throw new Error('Board Studio root path unavailable');
+                }
+                const absoluteIndexPath = path.join(resolvedRoot, 'index.js');
+                if (!fs.existsSync(absoluteIndexPath)) {
+                    throw new Error(`Missing Board Studio index.js at ${absoluteIndexPath}`);
+                }
+                if (!tryRequire(absoluteIndexPath)) {
+                    throw lastRequireError || new Error(`Failed to load Board Studio from ${absoluteIndexPath}`);
+                }
+                return;
+            }).catch((error) => {
+                showBootError('Board Studio failed to start', error);
+            });
+        })();
+    </script>
+</body>
+</html>

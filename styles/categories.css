@@ -1,0 +1,131 @@
+/* MARK: Category Drawer */
+.category-edge-trigger {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 12px;
+    z-index: 58;
+    -webkit-app-region: no-drag;
+}
+
+.category-edge-trigger::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 2px;
+    height: 72px;
+    border-radius: 2px 0 0 2px;
+    background: var(--accent);
+    opacity: 0.16;
+    transform: translateY(-50%);
+    transition: opacity 0.14s ease, height 0.14s ease;
+}
+
+.category-edge-trigger:hover::after,
+.workspace.is-category-drawer-open .category-edge-trigger::after {
+    height: 112px;
+    opacity: 0.72;
+}
+
+.category-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(288px, calc(100% - 64px));
+    padding: 14px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-card-deep) 96%, transparent), color-mix(in srgb, var(--bg-surface) 98%, transparent));
+    border-left: 1px solid var(--border-subtle);
+    box-shadow: -18px 0 44px rgba(0, 0, 0, 0.34);
+    transform: translateX(calc(100% + 18px));
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.16s ease-out, opacity 0.12s ease-out;
+    z-index: 60;
+    overflow-y: auto;
+}
+
+.category-drawer.is-open {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.category-drawer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 100%;
+}
+
+.category-card {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(116px, 1fr) auto;
+    width: 100%;
+    min-height: 156px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 88%, transparent);
+    border-radius: 14px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.category-card:hover,
+.category-card:focus-visible,
+.category-card.is-drop-target {
+    outline: none;
+    transform: translateX(-3px);
+    border-color: var(--accent-outline);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--accent-soft);
+}
+
+.category-card.is-active {
+    border-color: var(--accent);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28), 0 0 0 2px var(--accent-soft);
+}
+
+.category-card-preview {
+    position: relative;
+    min-height: 116px;
+    background:
+        var(--board-preview-url, none) center / cover no-repeat,
+        linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+}
+
+.category-card-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 48%, rgba(8, 8, 11, 0.5));
+    pointer-events: none;
+}
+
+.category-card-name {
+    padding: 12px 14px 13px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+}
+
+.category-card.is-active .category-card-name {
+    color: var(--accent-strong);
+}
+
+body[data-window-activity="background"] .category-drawer,
+body[data-window-activity="hidden"] .category-drawer {
+    transition: none;
+}
+
+.workspace.is-splash .category-edge-trigger,
+.workspace.is-splash .category-drawer {
+    display: none;
+}
